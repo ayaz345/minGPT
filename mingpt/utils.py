@@ -45,8 +45,7 @@ class CfgNode:
         parts = []
         for k, v in self.__dict__.items():
             if isinstance(v, CfgNode):
-                parts.append("%s:\n" % k)
-                parts.append(v._str_helper(indent + 1))
+                parts.extend(("%s:\n" % k, v._str_helper(indent + 1)))
             else:
                 parts.append("%s: %s\n" % (k, v))
         parts = [' ' * (indent * 4) + p for p in parts]
@@ -72,7 +71,9 @@ class CfgNode:
         for arg in args:
 
             keyval = arg.split('=')
-            assert len(keyval) == 2, "expecting each override arg to be of form --arg=value, got %s" % arg
+            assert (
+                len(keyval) == 2
+            ), f"expecting each override arg to be of form --arg=value, got {arg}"
             key, val = keyval # unpack
 
             # first translate val into a python object
@@ -99,5 +100,5 @@ class CfgNode:
             assert hasattr(obj, leaf_key), f"{key} is not an attribute that exists in the config"
 
             # overwrite the attribute
-            print("command line overwriting config attribute %s with %s" % (key, val))
+            print(f"command line overwriting config attribute {key} with {val}")
             setattr(obj, leaf_key, val)

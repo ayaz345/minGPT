@@ -45,8 +45,7 @@ def bytes_to_unicode():
             cs.append(2**8+n)
             n += 1
     cs = [chr(n) for n in cs]
-    d = dict(zip(bs, cs))
-    return d
+    return dict(zip(bs, cs))
 
 def get_pairs(word):
     """
@@ -195,12 +194,11 @@ class Encoder:
                 'token_merged': token_merged,
                 'token_ix': token_ix,
             })
-        out = {
-            'bpe_idx': bpe_idx, # the actual output sequence
-            'tokens': tokens, # result of pre-tokenization
-            'parts': parts, # intermediates for each token part
+        return {
+            'bpe_idx': bpe_idx,  # the actual output sequence
+            'tokens': tokens,  # result of pre-tokenization
+            'parts': parts,  # intermediates for each token part
         }
-        return out
 
     def decode(self, bpe_idx):
         """ list of integers comes in, string comes out """
@@ -209,9 +207,7 @@ class Encoder:
         # inverse the byte encoder, e.g. recovering 'Ġ' -> ' ', and get the bytes
         tokens_flat = ''.join(tokens_merged)
         tokens_bytes = bytearray([self.byte_decoder[c] for c in tokens_flat])
-        # recover the full utf-8 string
-        text = tokens_bytes.decode('utf-8', errors='replace')
-        return text
+        return tokens_bytes.decode('utf-8', errors='replace')
 
 def get_file(local_file, remote_file):
     """ downloads remote_file to local_file if necessary """
@@ -248,9 +244,7 @@ def get_encoder():
     bpe_merges = [tuple(merge_str.split()) for merge_str in bpe_data.split('\n')[1:-1]]
     assert len(bpe_merges) == 50000 # 50,000 merged tokens
 
-    # construct the Encoder object and return
-    enc = Encoder(encoder, bpe_merges)
-    return enc
+    return Encoder(encoder, bpe_merges)
 
 # -----------------------------------------------------------------------------
 
@@ -267,16 +261,12 @@ class BPETokenizer:
         assert isinstance(text, str)
         # encode and create a "batch dimension" of 1
         idx = [self.encoder.encode(text)]
-        # wrap into PyTorch tensor
-        out = torch.tensor(idx, dtype=torch.long)
-        return out
+        return torch.tensor(idx, dtype=torch.long)
 
     def decode(self, idx):
         # ensure a simple 1D tensor for now
         assert idx.ndim == 1
-        # decode indices to text
-        text = self.encoder.decode(idx.tolist())
-        return text
+        return self.encoder.decode(idx.tolist())
 
 
 if __name__ == '__main__':
